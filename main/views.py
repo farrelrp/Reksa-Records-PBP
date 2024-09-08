@@ -1,4 +1,6 @@
 from django.shortcuts import render
+from .models import VinylRecord
+vinyls = VinylRecord.objects.all()
 
 # Create your views here.
 def show_main(request):
@@ -6,6 +8,7 @@ def show_main(request):
         'name': 'Farrel Reksa Prawira',
         'npm' : '2306275286',
         'kelas' : 'A',
-        'aplikasi' : 'Record Store'
+        'aplikasi' : "Reksa's Records",
+        'vinyls' : vinyls
     }
     return render(request, "main.html", context)

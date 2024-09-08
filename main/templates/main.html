@@ -3,13 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="static\css\main.css" />
-    <title>Record Store</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Reksa's Records</title>
   </head>
-  <body>
-    <h2 id="title">{{ aplikasi }}</h2>
+  <body class="p-4">
+    <div class="border-b-2 mb-4">
+      <h1 id="title" class="font-bold text-4xl pb-2">{{ aplikasi }}</h1>
+    </div>
     <div id="info">
-      Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}
+      <h2>Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}!</h2>
+    </div>
+    <div class="flex flex-wrap gap-6">
+      {% for vinyl in vinyls %} {% include "components/vinyl.html" %} {% empty%}
+      <p>No vinyl records available.</p>
+      {% endfor %}
     </div>
   </body>
 </html>
