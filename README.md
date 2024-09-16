@@ -1,3 +1,5 @@
+Deployed : http://farrel-reksa-reksasrecords.pbp.cs.ui.ac.id/
+
 ## A. Step-by-step Implementasi Checklist
 
 1. **Membuat Repository Git**
