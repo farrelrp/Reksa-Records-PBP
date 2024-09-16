@@ -1,20 +1,13 @@
-{% extends 'base.html' %}
-
-{% block title %}
-  Reksa's Records
-{% endblock title %}
-
-
+{% extends 'base.html' %} {% block title %} Reksa's Records {% endblock title %}
 {% block content %}
-  <body class="p-4">
-    <div class="mb-4">
-      <h2>Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}!</h2>
-    </div>
-    <div class="flex flex-wrap gap-6">
-      {% for vinyl in vinyls %} {% include "components/vinyl.html" %} {% empty%}
-      <p>No vinyl records available.</p>
-      {% endfor %}
-    </div>
-  </body>
-</html>
+<div class="mx-4">
+  <div class="mb-4">
+    <h2>Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}!</h2>
+  </div>
+  <div class="flex flex-wrap gap-6">
+    {% for vinyl in vinyls %} {% include "components/vinyl.html" %} {% empty%}
+    <p>No vinyl records available.</p>
+    {% endfor %}
+  </div>
+</div>
 {% endblock content %}

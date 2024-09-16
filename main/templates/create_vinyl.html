@@ -1,17 +1,73 @@
-{% extends 'base.html' %} 
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+{% block title %} Add Vinyl {% endblock title %}
 {% block content %}
-<h1>Add Vinyl Entry</h1>
 
-<form method="POST">
+<h1 class="flex justify-center items-center text-2xl font-bold">
+  Add Vinyl Record
+</h1>
+
+<form
+  method="POST"
+  class="mt-4 font-sans border flex flex-col justify-center items-center max-w-lg mx-auto rounded-md p-8 shadow-lg"
+  enctype="multipart/form-data"
+>
   {% csrf_token %}
-  <table>
+
+  <div class="mb-4 w-full">
+    <label for="album_name" class="block text-lg font-semibold">Album Name:</label>
+    <div class="relative">
+      {% render_field form.album_name class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Album Name' %}
+    </div>
+  </div>
+
+  <div class="mb-4 w-full">
+    <label for="artist" class="mr-4 text-lg font-semibold">Artist:</label>
+    <div class="relative">
+      {% render_field form.artist class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Artist Name' %}
+    </div>
+  </div>
+
+  <div class="mb-4 w-full">
+    <label for="price" class="mr-4 text-lg font-semibold">Price:</label>
+    <div class="relative">
+      {% render_field form.price class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Retail Price' %}
+    </div>
+  </div>
+
+  <div class="mb-4 w-full">
+    <label for="description" class="mr-4 text-lg font-semibold">Description:</label>
+    <div class="relative">
+      {% render_field form.description class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Album Description' %}
+    </div>
+  </div>
+
+  <div class="mb-4 w-full">
+    <label for="image" class="block text-lg font-semibold">Album Cover:</label>
+    <div class="relative">
+      {% render_field form.image class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Image' %}
+    </div>
+  </div>
+
+  <div class="flex justify-end w-full">
+    <button type="submit"
+    class="bg-green-500 hover:bg-green-700 text-white font-sans font-bold rounded py-2 px-4 w-full">
+    Submit!
+    </button>
+  </div>
+
+</form>
+
+{% endblock content %}
+
+
+
+  <!-- <table>
     {{ form.as_table }}
     <tr>
       <td></td>
       <td>
-        <input type="submit" value="Add Vinyl Record">
+        <input type="submit" value="Add Vinyl Record" />
+      </td>
     </tr>
-  </table>
-</form>
-
-{% endblock %}
+  </table> -->
