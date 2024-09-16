@@ -1,15 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Reksa's Records</title>
-  </head>
+{% extends 'base.html' %}
+
+{% block title %}
+  Reksa's Records
+{% endblock title %}
+
+
+{% block content %}
   <body class="p-4">
-    <div class="border-b-2 mb-4">
-      <h1 id="title" class="font-bold text-4xl pb-2">{{ aplikasi }}</h1>
-    </div>
     <div class="mb-4">
       <h2>Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}!</h2>
     </div>
@@ -20,3 +17,4 @@
     </div>
   </body>
 </html>
+{% endblock content %}
