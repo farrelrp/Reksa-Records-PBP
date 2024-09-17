@@ -1,4 +1,4 @@
-Deployed : http://farrel-reksa-reksasrecords.pbp.cs.ui.ac.id/
+**Deployed : http://farrel-reksa-reksasrecords.pbp.cs.ui.ac.id/**
 
 # Tutorial 1
 
@@ -174,3 +174,14 @@ CSRF (Cross-Site Request Forgery) adalah _cyberattack_ di mana penyerang mencoba
    - Untuk fungsi yang menerima parameter seperti fungsi show_xml_by_id, gunakan formatting < str:id > (tanpa spasi) setelah path yang dituju, contohnya "json/< str:id>" supaya views dapat menerima parameter id dan mengembalikan data yang sesuai.
 
 ## F. Screenshot Postman
+**json/**
+![image](https://github.com/user-attachments/assets/836c8819-1132-409d-b1ae-831d3814f349)
+**xml/**
+![image](https://github.com/user-attachments/assets/338e1e2b-296c-4831-add7-6380a76840ee)
+
+**json/id**
+![image](https://github.com/user-attachments/assets/eaf27c34-fdd5-4348-b7b8-5d4c5027f44c)
+
+**xml/id**
+![image](https://github.com/user-attachments/assets/d58f851c-4bc7-40d4-9d0a-ee95eead6f06)
+
