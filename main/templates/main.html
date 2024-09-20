@@ -3,6 +3,7 @@
 <div class="mx-4">
   <div class="mb-4">
     <h2>Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}!</h2>
+    <h2>Last Login Session : {{ last_login }}</h2>
   </div>
   <div class="flex flex-wrap gap-6">
     {% for vinyl in vinyls %} {% include "components/vinyl.html" %} {% empty%}

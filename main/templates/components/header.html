@@ -2,14 +2,13 @@
 <nav class="border-b-4 border-gray-200 w-full">
   <div class="flex justify-between items-center px-4 w-full">
     <a href="/" class="flex items-center space-x-4">
-      <img src="../../../static/images/logo.png" alt="Logo" class="w-16 h-16" />
+      <img src="{% static 'images/logo.png' %}" alt="Logo" class="w-16 h-16" />
       <h1 id="title" class="font-bold text-4xl pb-0">{{ aplikasi }}</h1>
     </a>
-    <div class="flex-grow"></div>
+    <!-- <div class="flex-grow"></div> -->
     <div class="flex items-center space-x-4 text-4xl font-bold">
-      <a href="/create_vinyl/" class="text-gray-400 hover:text-black"
-        >Add Vinyl</a
-      >
+      <a href="{% url 'main:create_vinyl' %}" class="text-gray-400 hover:text-black">Add Vinyl</a>
+      <a href="{% url 'main:logout' %}" class="text-gray-400 hover:text-black">Logout</a>
       <!-- <a href="/" class="text-gray-400 hover:text-black">Home</a> -->
     </div>
   </div>

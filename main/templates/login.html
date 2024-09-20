@@ -1,0 +1,63 @@
+{% extends 'base-guest.html' %} {% block title %} Login {% endblock title %}
+{% load widget_tweaks %}
+
+
+{% block content %}
+<div
+  class="flex justify-center items-center flex-col border-green-600 border-4"
+>
+  <form
+    method="POST"
+    action=""
+    class="mt-4 font-sans border flex flex-col justify-center items-center max-w-lg mx-auto rounded-md p-8 shadow-lg"
+  >
+    {% csrf_token %}
+
+    <!-- Username -->
+    <div class="mb-4 w-full">
+        <label for="username" class="block text-lg font-semibold">Username:</label>
+        <div class="relative">
+          {% render_field form.username class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Enter your username' %}
+        </div>
+        {% if form.username.errors %}
+        <ul class="mt-1 text-red-500 text-sm">
+          {% for error in form.username.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <!-- Password -->
+    <div class="mb-4 w-full">
+        <label for="password" class="block text-lg font-semibold">Password:</label>
+        <div class="relative">
+          {% render_field form.password class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Enter your password' %}
+        </div>
+        {% if form.password.errors %}
+        <ul class="mt-1 text-red-500 text-sm">
+          {% for error in form.password.errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    <div class="flex justify-end w-full">
+        <button type="submit"
+        class="bg-green-500 hover:bg-green-700 text-white font-sans font-bold rounded py-2 px-4 w-full">
+        Login
+        </button>
+    </div>
+    </form>
+
+  {% if messages %}
+  <ul>
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %} Don't have an account yet?
+  <a href="{% url 'main:register' %}" class="text-blue-500 underline">Register Now</a>
+</div>
+
+{% endblock content %}
