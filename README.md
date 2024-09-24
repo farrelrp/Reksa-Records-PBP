@@ -1,6 +1,6 @@
 **Deployed : http://farrel-reksa-reksasrecords.pbp.cs.ui.ac.id/**
 
-# Tutorial 1
+# Tugas 1
 
 ## A. Step-by-step Implementasi Checklist
 
@@ -103,7 +103,7 @@ Git berfungsi sebagai sebuah sistem version control yang dilakukan untuk melacak
 
 Model pada Django disebut sebagai ORM atau Object-Relational Mapping karena cara kerja model adalah menghubungkan objek-objek di dalam kode Python dengan tabel-tabel di dalam database relasional. Django juga menangani konversi dari objek Python ke data yang dapat diolah dengan SQL.
 
-# Tutorial 2
+# Tugas 2
 
 ## A. Mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
 
@@ -185,3 +185,164 @@ CSRF (Cross-Site Request Forgery) adalah _cyberattack_ di mana penyerang mencoba
 **xml/id**
 ![image](https://github.com/user-attachments/assets/d58f851c-4bc7-40d4-9d0a-ee95eead6f06)
 
+# Tugas 3
+
+## A. Perbedaan antara HttpResponseRedirect() dan redirect()
+1. HttpResponseRedirect()
+- Hanya menerima string yang berisi URL sebuah page dan akan melakukan redirect ke page tersebut. 
+- Fungsi ini lebih sederhana karena hanya menerima URL, sehingga apabila ingin mengearah ke sebuah view harus menggunakan fungsi reverse().
+
+2. redirect()
+- Menerima string URL, nama view, atau objek model.
+- Redirecting ke URL yang sesuai dilakukan oleh Django sehingga lebih fleksibel dan dinamis.
+
+
+## B. Menghubungkan VinylRecord dengan User
+1. Tambahkan konteks user ke model VinylRecord
+- Import from django.contrib.auth.models import User ke file models. 
+- Asosiasikan tiap item dengan satu user dengan menambah field user ke dengan code `user = models.ForeignKey(User, on_delete=models.CASCADE)`
+
+2. Simpan konteks user penambah vinyl tiap kali penambahan vinyl
+- Tambahkan `vinyl_form.user = request.user` dan `vinyl_form.save()` pada view penambahan vinyl supaya tiap item Vinyl terasosiasi dengan user yang menambahkannya
+
+3. Tampilkan vinyl yang sesuai dengan user di main
+- Pada view main, tambahkan filter pada objek vinyl yang diambil yang mencari berdasarkan user dengan menambah `vinyls = VinylRecord.objects.filter(user=request.user)` 
+ 
+## C. Perbedaan Authentication dan Authorization
+1. **Authentication**
+- Authentication adalah proses untuk menentukan *siapa* yang sedang menggunakan aplikasi atau sistem dan apakah *siapa* tersebut merupakan orang yang sebenarnya.
+- Contoh :
+    - Saat mahasiswa login ke SCELE menggunakan user dan password mereka
+    - Orang login ke akun Google dengan menginput email mereka dan menerima kode 2FA di SMS
+
+2. **Authorization**
+- Authorization adalah proses untuk menentukan *apa* yang dapat dilakukan oleh pengguna setelah mereka berhasil terautentikasi, yaitu hak akses atau izin yang dimiliki oleh pengguna terhadap data atau fungsi dalam aplikasi atau sistem.
+- Contoh : 
+    - Setelah mahasiswa berhasil login ke SCELE, sistem memeriksa apakah mereka memiliki izin untuk mengakses materi kuliah tertentu. Atau apakah mereka memiliki akses mengedit sebuah quiz / menilai tugas.
+    - Jika pengguna login ke akun Google mereka, authorization menentukan apakah mereka memiliki akses untuk mengedit dokumen di Google Drive atau hanya bisa melihatnya, tergantung pada pengaturan perizinan yang diatur oleh pemilik dokumen.
+
+3. **Implementasi Django**
+- **Authentication**
+    -   Django menggunakan built-in authentication system yang memungkinkan pengguna untuk login, logout, dan mengelola session.
+    -   Library bawaan: `django.contrib.auth` untuk proses Auth.
+    -   Implementasi:
+    ```python
+    python from django.contrib.auth import authenticate, login
+
+    def my_view(request):
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+    ```
+- **Authorization**
+    - Django menggunakan permission system untuk menentukan akses pengguna terhadap tindakan dan data tertentu.
+    - Library bawaan untuk decorator: `from django.contrib.auth.decorators`
+    - Dapat mengguanakan decorators seperti `@login_required` dan `@permission_required` untuk membatasi akses ke view tertentu berdasarkan apakah pengguna sudah login dan apakah mereka memiliki izin yang sesuai.
+    - Implementasi:
+    ```python
+    @login_required(login_url='/login')
+def show_main(request):
+        vinyls = VinylRecord.objects.filter(user=request.user)
+        context = {
+            'name': request.user.username,
+            'npm': '2306275286',
+            'kelas': 'A',
+            'aplikasi': "Reksa's Records",
+            'vinyls': vinyls,
+            'last_login': request.COOKIES.get('last_login')
+        }
+    return render(request, "main.html", context)
+
+    ```
+
+
+## D. Bagaimana Django Mengingat Pengguna, Kegunaan dan Keamanan Cookies
+### Cara Django Mengingat Pengguna
+- Django mengingat pengguna yang telah login menggunakan *session management* yang berbasis *cookies*. Setelah user berhasil login, Django menyimpan informasi session dalam cookie yang dikirimkan ke browser pengguna.
+### Kegunaan Lain dari Cookies
+- Pelacakan : Menyimpan data lokasi terakhir
+- Pengaturan Preferensi : Menyimpan preferensi user seperti dark mode / light mode
+- _Shopping Cart_ : Pada website E-commerce, cookies digunakan untuk menyimpan user sudah menambah item apa saja pada cart mereka.
+### Keamanan Cookies
+- Jika cookies tidak di-seting dengan benar, data pada cookies bisa dicuri oleh pihak ketiga menggunakan teknik seperti _session hijacking_. Misalnya, jika cookie tidak dienkripsi dan dikirim melalui koneksi HTTP yang _unsecured_, data bisa di _intercept_ oleh hacker.
+
+## E. Implementasi Step-by-Step Checklist
+1. **Membuat view untuk page Auth di views.py**
+- Tambahkan library untu autentikasi
+```
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth import authenticate, login
+```
+- Buat view untuk handle login user
+```python
+def login_user(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            response = HttpResponseRedirect(reverse("main:show_main"))
+            response.set_cookie('last_login', str(datetime.datetime.now()))
+            return response
+    else:
+        form = AuthenticationForm()
+    context = {'form': form}
+    return render(request, 'login.html', context)
+
+```
+View ini akan mengirim form yang akan disediakan di template login.html, lalu melakukan verifikasi pada login dengan function `login(request, user)`. Jika login berhasil (akun valid), maka akan me-redirect ke view main.
+- Buat view untuk handle logout user
+```
+def logout_user(request):
+    logout(request)
+    response = HttpResponseRedirect(reverse('main:login'))
+    response.delete_cookie('last_login')
+    return redirect('main:login')
+```
+View ini akan memanggil fungsi `logout` yang akan membuang session user, kemudian meredirect user ke view login.
+- Membuat view untuk handle register
+```
+def register(request):
+    if request.method == "POST":
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Your account has been successfully created!')
+            return redirect('main:login')
+    else:
+        form = UserCreationForm()
+    context = {'form': form}
+    return render(request, 'register.html', context)
+```
+View ini akan mengirim UserCreationForm ke template dan menerima response valid. Response tersebut akan menciptakan sebuah user baru disistem yang dapat digunakan saat login. 
+
+2. **Membuat template untuk tiap view baru**
+- Buat login.html untuk view login_user, di dalam tempalte ini akan menampilkan form yang dikirim oleh view. 
+- Buat register.html untuk view register, di dalam template ini akan menampilkan form yang dikirim oleh view.
+
+3. **Menambah Routing**
+- Pada urls.py di direktori app tambahkan path untuk tiap view yang baru dibuat
+```
+    path('register/', register, name='register'),
+    path('login/', login_user, name='login'),
+    path('logout/', logout_user, name='logout'),
+
+```
+
+3. **Menggunakan Cookies untuk Menampilkan Last Login**
+- Di views.py, import library datetime untuk mendapatkan waktu terkini dengan `import datetime`
+- Pada view login_user, ketika user berhasil login, simpan waktu mereka login pada cookies dengan menambahkan `response.set_cookie('last_login', str(datetime.datetime.now()))` pada objek response yang akan mengarah ke main.
+- Pada view show_main, ubah pengiriman nama dengan memanggil `request.user.username` dan pass parameter baru untuk cookies last_login dengan `'last_login' : request.COOKIES.get('last_login')`
+
+4. **Menampilkan user last login di main**
+
+Pada tempalte main.html,
+- Panggil objek username yang dikirim oleh view untuk memanggil username dari user.
+- Panggil objek last_login yang dikirim oleh view saat kita login dengan `{{ last_login }}` untuk menggunakan cookies untuk menampilkan waktu terakhir login.
+
+5. **Menghubungkan VinylRecord dengan User**
+- Pada models.py di model VinylRecord, tambahkan library untuk meneirma User dengan `from django.contrib.auth.models import User`. 
+- Tambahkan `user = models.ForeignKey(User, on_delete=models.CASCADE)` untuk mengasosiakian tiap item vinyl dengan user yang menciptakannya
+- Pada views.py, pada view show_main, ubah cara pemanggilan item vinyl untuk filter berdasarkan user yang terasosiasi dengan vinyl tersebut dengan `vinyls = VinylRecord.objects.filter(user=request.user)

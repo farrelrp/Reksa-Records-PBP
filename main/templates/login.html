@@ -4,7 +4,7 @@
 
 {% block content %}
 <div
-  class="flex justify-center items-center flex-col border-green-600 border-4"
+  class="flex justify-center items-center flex-col"
 >
   <form
     method="POST"
@@ -12,7 +12,6 @@
     class="mt-4 font-sans border flex flex-col justify-center items-center max-w-lg mx-auto rounded-md p-8 shadow-lg"
   >
     {% csrf_token %}
-
     <!-- Username -->
     <div class="mb-4 w-full">
         <label for="username" class="block text-lg font-semibold">Username:</label>
@@ -48,6 +47,17 @@
         Login
         </button>
     </div>
+
+    <!-- Errors -->
+    {% if form.errors and form.is_bound %}
+      <div class="mb-4 w-full">
+        <ul class="text-red-500">
+          {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
     </form>
 
   {% if messages %}
