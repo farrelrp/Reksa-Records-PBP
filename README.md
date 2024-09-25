@@ -243,7 +243,7 @@ CSRF (Cross-Site Request Forgery) adalah _cyberattack_ di mana penyerang mencoba
     - Implementasi:
     ```python
     @login_required(login_url='/login')
-def show_main(request):
+    def show_main(request):
         vinyls = VinylRecord.objects.filter(user=request.user)
         context = {
             'name': request.user.username,
@@ -271,7 +271,7 @@ def show_main(request):
 ## E. Implementasi Step-by-Step Checklist
 1. **Membuat view untuk page Auth di views.py**
 - Tambahkan library untu autentikasi
-```
+```python
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login
 ```
@@ -294,7 +294,7 @@ def login_user(request):
 ```
 View ini akan mengirim form yang akan disediakan di template login.html, lalu melakukan verifikasi pada login dengan function `login(request, user)`. Jika login berhasil (akun valid), maka akan me-redirect ke view main.
 - Buat view untuk handle logout user
-```
+```python
 def logout_user(request):
     logout(request)
     response = HttpResponseRedirect(reverse('main:login'))
@@ -303,7 +303,7 @@ def logout_user(request):
 ```
 View ini akan memanggil fungsi `logout` yang akan membuang session user, kemudian meredirect user ke view login.
 - Membuat view untuk handle register
-```
+```python
 def register(request):
     if request.method == "POST":
         form = UserCreationForm(request.POST)
@@ -324,7 +324,7 @@ View ini akan mengirim UserCreationForm ke template dan menerima response valid.
 
 3. **Menambah Routing**
 - Pada urls.py di direktori app tambahkan path untuk tiap view yang baru dibuat
-```
+```python
     path('register/', register, name='register'),
     path('login/', login_user, name='login'),
     path('logout/', logout_user, name='logout'),
