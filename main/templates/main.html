@@ -1,13 +1,22 @@
-{% extends 'base.html' %} {% block title %} Reksa's Records {% endblock title %}
+{% extends 'base.html' %} {% block title %} Reksa's Records {% endblock title %} 
+{% load static %}
 {% block content %}
-<div class="mx-4">
-  <div class="mb-4">
-    <h2>Hi! I'm {{ name }} ({{ npm }}) from PBP Class {{ kelas }}!</h2>
-    <h2>Last Login Session : {{ last_login }}</h2>
+<div class="bg-blue-500 text-white py-8 px-4 mb-4 flex flex-col items-center">
+  <h1 class="text-4xl font-bold mb-2">Hello, {{ name }}!</h1>
+  <h2 class="text-2xl">🎵 Interested in some vinyl records? 🎵</h2>
+  <div class="text-xl">
+    <h2>Last Login Session: {{ last_login }}</h2>
   </div>
+</div>
+
+<div class="mx-4">
   <div class="flex flex-wrap gap-6">
-    {% for vinyl in vinyls %} {% include "components/vinyl.html" %} {% empty%}
-    <p>No vinyl records available.</p>
+    {% for vinyl in vinyls %} {% include "components/vinyl-card-main.html" %} 
+    {% empty %}
+    <div class="flex justify-center items-center w-full">
+      <p class="text-2xl font-bold text-center">No vinyl records found.</p>
+      <img src="{% static 'images/sad-face.svg' %}" alt="Sad Face" class="w-24 h-24 mt-4">
+    </div>
     {% endfor %}
   </div>
 </div>

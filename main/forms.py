@@ -4,4 +4,4 @@ from main.models import VinylRecord
 class VinylRecordForm(ModelForm):
     class Meta:
         model = VinylRecord
-        fields = ['image', 'album_name', 'artist', 'price', 'description']
+        fields = ['image', 'album_name', 'artist', 'price', 'description', 'genre']

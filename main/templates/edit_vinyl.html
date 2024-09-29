@@ -4,7 +4,7 @@
 {% block content %}
 
 <h1 class="flex justify-center items-center text-2xl font-bold">
-  Add Vinyl Record
+   Edit Vinyl Record
 </h1>
 
 <form
@@ -56,14 +56,20 @@
       {% render_field form.image class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Image' %}
     </div>
   </div>
-
-  <div class="flex justify-end w-full">
-    <button type="submit"
-    class="bg-green-500 hover:bg-green-700 text-white font-sans font-bold rounded py-2 px-4 w-full">
-    Submit!
-    </button>
+  <div class="flex justify-end w-full gap-4 text-center">
+    <div class="flex justify-end w-full">
+        <a href="{% url 'main:delete_vinyl' vinyl.id %}"
+        class="bg-red-500 hover:bg-red-700 text-white font-sans font-bold rounded py-2 px-4 w-full">
+        Delete Vinyl Record
+        </a>
+    </div>
+    <div class="flex justify-end w-full">
+        <button type="submit"
+        class="bg-green-500 hover:bg-green-700 text-white font-sans font-bold rounded py-2 px-4 w-full">
+        Update Vinyl Record
+        </button>
+    </div>
   </div>
-
 </form>
 
 {% endblock content %}

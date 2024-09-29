@@ -1,0 +1,20 @@
+{% extends 'base.html' %} {% block title %} Favorites {% endblock title %}
+{% load static %}
+{% block content %}
+<div class="bg-green-500 text-white py-8 px-4 mb-4 flex flex-col items-center">
+  <h1 class="text-4xl font-bold mb-2">Hello, {{ name }}!</h1>
+  <h2 class="text-2xl">🎵 Your <b>favorite</b> vinyl records! 🎵</h2>
+</div>
+
+<div class="mx-4">
+  <div class="flex flex-wrap gap-6">
+    {% for vinyl in vinyls %} {% include "components/vinyl-card-fav.html" %} 
+    {% empty%}
+    <div class="flex justify-center items-center w-full flex-col">
+        <p class="text-2xl font-bold text-center">No favorite vinyl records found. Add some!</p>
+        <img src="{% static 'images/sad-face.svg' %}" alt="Sad Face" class="w-24 h-24 mt-4">
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock content %}

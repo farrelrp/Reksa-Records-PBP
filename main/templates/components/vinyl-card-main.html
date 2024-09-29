@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vinyl Card</title>
+  </head>
+  <body>
+    <div
+      class="vinyl-card bg-white shadow-md rounded-lg overflow-hidden w-64 h-auto transform transition-transform hover:scale-110 hover:shadow-xl"
+    >
+    <a href="{% if user in vinyl.favorited_by.all %}{% url 'main:remove_from_favorites' vinyl.id %}{% else %}{% url 'main:add_to_favorites' vinyl.id %}{% endif %}"
+           class="absolute top-2 right-2 text-yellow-500">
+          {% if user in vinyl.favorited_by.all %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          {% endif %}
+        </a>
+      <div class="vinyl-card-image">
+        <img
+          src="{{ vinyl.image.url }}"
+          alt="Vinyl Image"
+          class="vinyl-image w-full h-48 object-fit"
+        />
+      </div>
+      <div class="vinyl-info p-4">
+        <h3 class="vinyl-title text-lg font-semibold mb-0.5">
+          {{ vinyl.album_name }}
+        </h3>
+        <h4 class="vinyl-artist text-gray-400"> by {{ vinyl.artist }}</h4>
+        <h4 class="vinyl-price text-green-800 font-semibold mt-2">
+          ${{ vinyl.price }}
+        </h4>
+        <a href="{% url 'main:edit_vinyl' vinyl.id %}" class="absolute bottom-2 right-2 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="white" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </body>
+</html>
