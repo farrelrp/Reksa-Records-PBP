@@ -409,11 +409,18 @@ Responsive design menjadi konsep penting dalam pengembangan aplikasi web karena 
 
 **X.com**  
 Tampilan X.com akan berubah tergantung dengan ukuran dan orientasi web, dengan perubahan paling terlihat ada pada sidebar yang menjadi bottom-bar dan konten yang hanya terfokus pada tampilan utama.
+![image](https://github.com/user-attachments/assets/be615a93-e72c-445e-80c2-fc46c608b186)
+
+![image](https://github.com/user-attachments/assets/883b25dc-023b-41dc-b1cb-189e996c4183)
+
+
 
 ### Contoh Unresponsive:
 
 **SiakNG**  
 Website SiakNG tidak responsive karena tampilan pada mobile dan desktop sama persis. Hal ini membuat user experience di mobile menjadi buruk karena ukuran tombol yang relatif sangat kecil.
+![image](https://github.com/user-attachments/assets/48add3c9-323a-4ebf-99e9-31ce4270d7c7)
+![image](https://github.com/user-attachments/assets/f2e38b5b-ceb8-4434-b2ed-41cc04629bbd)
 
 ---
 
