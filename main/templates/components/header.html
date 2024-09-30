@@ -1,52 +1,71 @@
 {% load static %}
-<nav class="border-b-4 border-gray-200 w-full flex justify-between items-center">
-
-  <!-- desktop -->
-  <div class="hidden md:flex justify-between items-center px-4 w-full">
+<nav class="border-b-4 border-gray-200 w-full flex flex-col">
+  <div class="flex justify-between items-center px-4 py-2">
     <a href="/" class="flex items-center space-x-4">
       <img src="{% static 'images/logo.png' %}" alt="Logo" class="w-16 h-16" />
-      <h1 id="title" class="font-bold text-4xl pb-0">Reksa's Records</h1>
+      <h1 id="title" class="font-bold text-2xl pb-0 w-full">Reksa's Records</h1>
     </a>
-    <div class="flex-grow mx-4 md:block hidden">
-      <!-- search -->
-      <form method="GET" action="{% url 'main:show_main' %}" class="flex">
-        <input type="text" name="q" placeholder="Search vinyls..." class="p-2 border rounded w-full">
-        <button type="submit" class="font-bold  p-2 bg-gray-400 ml-2 text-white rounded-lg hover:bg-black">Search</button>
-      </form>
+    
+    <div class="hidden md:flex justify-between items-center w-full">
+      <div class="flex-grow mx-4">
+        <!-- Search -->
+        <form method="GET" action="{% url 'main:show_main' %}" class="flex">
+          <input type="text" name="q" placeholder="Search vinyls..." class="p-2 border rounded w-full">
+          <button type="submit" class="font-bold p-2 bg-gray-400 ml-2 text-white rounded-lg hover:bg-black">Search</button>
+        </form>
+      </div>
+      <div class="flex items-center space-x-4 text-xl font-bold">
+        <a href="{% url 'main:show_favorites' %}" class="text-gray-400 hover:text-black">Favorites</a>
+        <a href="{% url 'main:create_vinyl' %}" class="text-gray-400 hover:text-black">Add Vinyl</a>
+        <a href="{% url 'main:logout' %}" class="text-gray-400 hover:text-red-500">Logout</a>
+      </div>
     </div>
-    <div class="flex items-center space-x-4 text-xl font-bold">
-      <a href="{% url 'main:show_favorites' %}" class="text-gray-400 hover:text-black">Favorites</a>
-      <a href="{% url 'main:create_vinyl' %}" class="text-gray-400 hover:text-black">Add Vinyl</a>
-      <a href="{% url 'main:logout' %}" class="text-gray-400 hover:text-black">Logout</a>
-    </div>
-  </div>
-
-  <!-- mobile -->
-  <div class="md:hidden flex justify-between items-center px-4 w-full">
-    <a href="/" class="flex items-center space-x-4">
-      <img src="{% static 'images/logo.png' %}" alt="Logo" class="w-16 h-16" />
-      <h1 id="title" class="font-bold text-4xl pb-0">Reksa's Records</h1>
-    </a>
-    <button id="burger-menu" class="text-gray-400 hover:text-black focus:outline-none">
+    
+    <button id="burger-menu" class="md:hidden text-gray-400 hover:text-black focus:outline-none">
       <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
       </svg>
     </button>
   </div>
 
-  <div id="mobile-menu" class="hidden md:hidden flex flex-col items-center space-y-4 mt-4">
-    <a href="{% url 'main:show_favorites' %}" class="text-gray-400 hover:text-black">Favorites</a>
-    <a href="{% url 'main:create_vinyl' %}" class="text-gray-400 hover:text-black">Add Vinyl</a>
-    <a href="{% url 'main:logout' %}" class="text-gray-400 hover:text-black">Logout</a>
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="hidden flex flex-col items-end w-full bg-white shadow-md py-4 space-y-4 font-bold px-4">
+    <a href="{% url 'main:show_favorites' %}" class="text-gray-600 hover:text-black text-center text-lg">Favorites</a>
+    <a href="{% url 'main:create_vinyl' %}" class="text-gray-600 hover:text-black text-center text-lg">Add Vinyl</a>
+    <a href="{% url 'main:logout' %}" class="text-gray-600 hover:text-black text-center text-lg">Logout</a>
+    <form method="GET" action="{% url 'main:show_main' %}" class="flex w-5/6 mt-4 font-normal">
+      <input type="text" name="q" placeholder="Search vinyls..." class="p-2 border rounded w-full">
+      <button type="submit" class="font-bold p-2 bg-gray-400 ml-2 text-white rounded-lg hover:bg-black">Search</button>
+    </form>
   </div>
 </nav>
+
 <script>
-  document.getElementById('burger-menu').addEventListener('click', function() {
-    var menu = document.getElementById('mobile-menu');
-    if (menu.classList.contains('hidden')) {
-      menu.classList.remove('hidden');
-    } else {
-      menu.classList.add('hidden');
-    }
+  document.addEventListener('DOMContentLoaded', function() {
+    const burgerMenu = document.getElementById('burger-menu');
+    const mobileMenu = document.getElementById('mobile-menu');
+  
+    const toggleMenu = () => {
+      mobileMenu.classList.toggle('hidden');
+      document.body.classList.toggle('overflow-hidden'); // Tidak bisa scroll jika menu terbuka
+    };
+    
+    burgerMenu.addEventListener('click', toggleMenu);
+    
+    // Close mobile menu jika klik luar menu
+    document.addEventListener('click', function(event) {
+      if (!mobileMenu.contains(event.target) && !burgerMenu.contains(event.target)) {
+        if (!mobileMenu.classList.contains('hidden')) {
+          toggleMenu();
+        }
+      }
+    });
+    
+    // Close mobile menu jika ukuran window >= 768px
+    window.addEventListener('resize', function() {
+      if (window.innerWidth >= 768 && !mobileMenu.classList.contains('hidden')) {
+        toggleMenu();
+      }
+    });
   });
 </script>
