@@ -11,29 +11,23 @@ import datetime
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.db.models import Q
-
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+from django.conf import settings
 # Create your views here.
 
 
 @login_required(login_url='/login')
 def show_main(request):
-    query = request.GET.get('q')
-    if query:
-        vinyls = VinylRecord.objects.filter(
-            Q(album_name__icontains=query) | 
-            Q(artist__icontains=query) |
-            Q(description__icontains=query)
-        )
-    else:
-        vinyls = VinylRecord.objects.all()
     
     context = {
         'name': request.user.username,
         'npm': '2306275286',
         'kelas': 'A',
         'aplikasi': "Reksa's Records",
-        'vinyls': vinyls,
-        'last_login': request.COOKIES.get('last_login')
+        'last_login': request.COOKIES.get('last_login'),
+        "MEDIA_URL": settings.MEDIA_URL,
+        "genres": [genre[1] for genre in VinylRecord.GENRE_CHOICES], # Ambil genre dari VinylRecord
     }
     return render(request, "main.html", context)
 
@@ -43,7 +37,8 @@ def show_favorites(request):
     context = {
         'name': request.user.username,
         'vinyls': vinyls,
-        'last_login': request.COOKIES.get('last_login')
+        'last_login': request.COOKIES.get('last_login'),
+        "MEDIA_URL": settings.MEDIA_URL,
     }
     return render(request, "favorites.html", context)
 
@@ -62,6 +57,53 @@ def create_vinyl(request):
                'aplikasi': "Reksa's Records"}
 
     return render(request, "create_vinyl.html", context)
+
+@csrf_exempt
+@require_POST
+def create_vinyl_ajax(request):
+    if request.method == 'POST':
+        album_name = request.POST.get("album_name")
+        artist = request.POST.get("artist")
+        release_year = request.POST.get("release_year")
+        genre = request.POST.get("genre")
+        price = request.POST.get("price")
+        description = request.POST.get("description")
+
+        vinyl = VinylRecord(
+            album_name=album_name,
+            artist=artist,
+            release_year=release_year,
+            genre=genre,
+            price=price,
+            description=description,
+            user=request.user
+        )
+
+        vinyl.save()
+        return HttpResponse(b"CREATED", status=201)
+    return HttpResponseNotFound()
+
+@csrf_exempt
+@require_POST
+def add_to_favorites_ajax(request, id):
+    if request.method == 'POST':
+        vinyl = get_object_or_404(VinylRecord, id=id)
+        request.user.favorite_vinyls.add(vinyl)
+        return HttpResponse(b"ADDED", status=201)
+    return HttpResponseNotFound()
+
+
+@csrf_exempt
+@require_POST
+def remove_from_favorites_ajax(request, id):
+    if request.method == 'POST':
+        vinyl = get_object_or_404(VinylRecord, id=id)
+        request.user.favorite_vinyls.remove(vinyl)
+        return HttpResponse(b"REMOVED", status=201)
+    return HttpResponseNotFound()
+
+
+
 
 @login_required(login_url='/login')
 def add_to_favorites(request, id):
@@ -120,11 +162,34 @@ def show_xml(request):
     return HttpResponse(data, content_type='application/xml')
 
 
+@login_required(login_url='/login')
 def show_json(request):
-    vinyls = VinylRecord.objects.all()
+    query = request.GET.get('q', '')
+    if query:
+        vinyls = VinylRecord.objects.filter(
+            Q(album_name__icontains=query) | 
+            Q(artist__icontains=query) |
+            Q(description__icontains=query)
+        )
+    else:
+        vinyls = VinylRecord.objects.all()
+    
     data = serializers.serialize('json', vinyls)
     return HttpResponse(data, content_type='application/json')
 
+@login_required(login_url='/login')
+def show_json_fav(request):
+    query = request.GET.get('q', '')
+    if query:
+        vinyls = request.user.favorite_vinyls.filter(
+            Q(album_name__icontains=query) | 
+            Q(artist__icontains=query) |
+            Q(description__icontains=query)
+        )
+    else:
+        vinyls = request.user.favorite_vinyls.all()
+    data = serializers.serialize('json', vinyls)
+    return HttpResponse(data, content_type='application/json')
 
 def show_xml_by_id(request, id):
     vinyls = VinylRecord.objects.filter(id=id)

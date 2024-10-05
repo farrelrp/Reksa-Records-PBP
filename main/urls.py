@@ -1,5 +1,6 @@
 from django.urls import path
 from main.views import show_main, create_vinyl, show_xml, show_json, show_xml_by_id, show_json_by_id, register, login_user, logout_user, add_to_favorites, remove_from_favorites, edit_vinyl, delete_vinyl, show_favorites, remove_from_favorites_fav
+from main.views import create_vinyl_ajax, add_to_favorites_ajax, remove_from_favorites_ajax, show_json_fav
 app_name = 'main'
 
 urlpatterns = [
@@ -18,4 +19,8 @@ urlpatterns = [
     path('delete_vinyl/<str:id>/', delete_vinyl, name='delete_vinyl'),
     path('favorites/', show_favorites, name='show_favorites'),
     path('remove_from_favorites_fav/<str:id>/', remove_from_favorites_fav, name='remove_from_favorites_fav'),
+    path('create_vinyl_ajax/', create_vinyl_ajax, name='create_vinyl_ajax'),
+    path('add_to_favorites_ajax/<str:id>/', add_to_favorites_ajax, name='add_to_favorites_ajax'),
+    path('remove_from_favorites_ajax/<str:id>/', remove_from_favorites_ajax, name='remove_from_favorites_ajax'),
+    path('json_fav/', show_json_fav, name='show_json_fav'),
 ]

@@ -6,15 +6,146 @@
   <h2 class="text-2xl">🎵 Your <b>favorite</b> vinyl records! 🎵</h2>
 </div>
 
-<div class="mx-4">
-  <div class="flex flex-wrap gap-6">
-    {% for vinyl in vinyls %} {% include "components/vinyl-card-fav.html" %} 
-    {% empty%}
-    <div class="flex justify-center items-center w-full flex-col">
-        <p class="text-2xl font-bold text-center">No favorite vinyl records found. Add some!</p>
-        <img src="{% static 'images/sad-face.svg' %}" alt="Sad Face" class="w-24 h-24 mt-4">
-    </div>
-    {% endfor %}
-  </div>
-</div>
+
+<div id="vinyl-cards" class="flex flex-wrap gap-6 mx-4"></div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const searchForm = document.getElementById('search-form');
+    const searchInput = document.getElementById('search-input');
+    const vinylCardsContainer = document.getElementById('vinyl-cards');
+    const currentUsername = "{{ request.user.username }}";
+    const currentUser = "{{ request.user.id }}"; // index dari user
+    const mediaUrl = "{{ MEDIA_URL }}"; 
+
+    searchForm.addEventListener('submit', function(event) {
+      event.preventDefault();
+      const query = searchInput.value.trim();
+      refreshVinylEntries(query);
+    });
+
+    async function getVinylEntries(query = '') {
+      let url = "{% url 'main:show_json_fav' %}";
+      if (query) {
+        url += `?q=${encodeURIComponent(query)}`;
+      }
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      console.log(response);
+      return await response.json();
+    }
+
+    async function refreshVinylEntries(query = '') {
+      try {
+        const vinylEntries = await getVinylEntries(query);
+        console.log(vinylEntries);
+        renderVinylCards(vinylEntries);
+      } catch (error) {
+        console.error('Error fetching vinyl records:', error);
+        vinylCardsContainer.innerHTML = '<p class="text-red-500">An error occurred while fetching vinyl records.</p>';
+      }
+    }
+
+    function renderVinylCards(vinyls) {
+      // Clear existing vinyl cards
+      vinylCardsContainer.innerHTML = '';
+
+      if (vinyls.length === 0) {
+        vinylCardsContainer.innerHTML = `
+          <div class="flex justify-center items-center w-full flex-col">
+            <p class="text-2xl font-bold text-center">No vinyl records found.</p>
+            <img src="{% static 'images/sad-face.svg' %}" alt="Sad Face" class="w-24 h-24 mt-4">
+          </div>
+        `;
+        return;
+      }
+
+      // Iterate over each vinyl record and create HTML elements
+      vinyls.forEach(vinyl => {
+        const vinylCardHTML = createVinylCard(vinyl);
+        vinylCardsContainer.insertAdjacentHTML('beforeend', vinylCardHTML);
+      });
+    }
+
+    // Event Delegation for Favorite Toggle Buttons
+    vinylCardsContainer.addEventListener('click', async function(event) {
+      const button = event.target.closest('.favorite-toggle');
+
+      if (button) {
+        event.preventDefault();
+        console.log("Favorite toggle clicked");
+
+        const vinylId = button.dataset.vinylId;
+        const isFavorited = button.dataset.favorited === 'true';
+        const url = isFavorited ? `/remove_from_favorites_ajax/${vinylId}/` : `/add_to_favorites_ajax/${vinylId}/`;
+        try {
+          const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': '{{ csrf_token }}' // Ensure CSRF token is included
+            },
+            body: JSON.stringify({ vinylId })
+          });
+          if (!response.ok) {
+            throw new Error('Network response was not ok');
+          }
+          refreshVinylEntries();
+        } catch (error) {
+          console.error('Error toggling favorite:', error);
+        }
+      }
+    });
+
+    function createVinylCard(vinyl) {
+      // Determine if the current user has favorited this vinyl
+      const isFavorited = vinyl.fields.favorited_by.includes(parseInt(currentUser));
+      
+      // Create the HTML structure for a vinyl card
+      return `
+      <div class="vinyl-card bg-white shadow-md rounded-lg overflow-hidden w-64 h-auto transform transition-transform hover:scale-110 hover:shadow-xl relative">
+        <button class="absolute top-2 right-2 text-yellow-500 favorite-toggle" data-vinyl-id="${vinyl.pk}" data-favorited="${isFavorited}">
+          ${isFavorited ? `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          ` : `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          `}
+        </button>
+        <div class="vinyl-card-image">
+          <img src="${mediaUrl}${vinyl.fields.image}" alt="Vinyl Image" class="vinyl-image w-full h-48 object-fit" />
+        </div>
+        <div class="vinyl-info p-4">
+          <h3 class="vinyl-title text-lg font-semibold mb-0.5">${vinyl.fields.album_name}</h3>
+          <h4 class="vinyl-artist text-gray-400"> by ${vinyl.fields.artist}</h4>
+          <h4 class="vinyl-price text-green-800 font-semibold mt-2">$${vinyl.fields.price}</h4>
+      `;
+    }
+
+    function updateFavoriteIcon(button, isFavorited) {
+      if (isFavorited) {
+        button.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+          </svg>
+        `;
+      } else {
+        button.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+          </svg>
+        `;
+      }
+    }
+
+    // Initial load
+    refreshVinylEntries();
+  });
+</script>
 {% endblock content %}
