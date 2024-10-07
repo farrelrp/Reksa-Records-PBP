@@ -59,7 +59,7 @@ def create_vinyl(request):
 
     return render(request, "create_vinyl.html", context)
 
-@csrf_exempt  # Consider removing this if you handle CSRF properly
+@csrf_exempt 
 @require_POST
 @login_required(login_url='/login')  # Ensure the user is authenticated
 def create_vinyl_ajax(request):

@@ -1,59 +1,66 @@
-{% extends 'base-guest.html' %} {% block title %} Login {% endblock title %}
+{% extends 'base-guest.html' %} 
+{% block title %} Login {% endblock title %}
 {% load widget_tweaks %}
 
-
 {% block content %}
-<div
-  class="flex justify-center items-center flex-col"
->
+<div class="flex justify-center items-center flex-col h-screen">
   <form
     method="POST"
     action=""
-    class="mt-4 font-sans border flex flex-col justify-center items-center max-w-lg mx-auto rounded-md p-8 shadow-lg"
+    class="bg-white bg-opacity-90 backdrop-filter backdrop-blur-lg border border-gray-200 flex flex-col justify-center items-center max-w-md w-full mx-4 rounded-xl p-10 shadow-2xl"
   >
     {% csrf_token %}
 
-    <div class="mb-4 w-full text-center text-2xl font-bold">
-      <h1>Login</h1>
+    <div class="mb-6 w-full text-center">
+      <h1 class="text-4xl font-extrabold text-gray-700">Login</h1>
+      <p class="text-gray-600 mt-2">Login to start adding your favorite vinyls!</p>
     </div>
 
-    <div class="mb-4 w-full">
-        <label for="username" class="block text-lg font-semibold">Username:</label>
-        <div class="relative">
-          {% render_field form.username class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Enter your username' %}
-        </div>
-        {% if form.username.errors %}
-        <ul class="mt-1 text-red-500 text-sm">
-          {% for error in form.username.errors %}
-          <li>{{ error }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %}
+    <div class="mb-5 w-full">
+      <label for="username" class="block text-lg font-semibold text-gray-700">Username:</label>
+      <div class="relative mt-1">
+        {% render_field form.username class+="bg-gray-100 p-3 rounded-lg text-sm w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder='Enter your username' %}
+      </div>
+      {% if form.username.errors %}
+      <ul class="mt-2 text-red-500 text-sm">
+        {% for error in form.username.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
     </div>
 
-    <div class="mb-4 w-full">
-        <label for="password" class="block text-lg font-semibold">Password:</label>
-        <div class="relative">
-          {% render_field form.password class+="bg-gray-200 p-2 rounded-lg cursor-pointer text-sm w-full" placeholder='Enter your password' %}
-        </div>
-        {% if form.password.errors %}
-        <ul class="mt-1 text-red-500 text-sm">
-          {% for error in form.password.errors %}
-          <li>{{ error }}</li>
-          {% endfor %}
-        </ul>
-        {% endif %}
+    <div class="mb-5 w-full">
+      <label for="password" class="block text-lg font-semibold text-gray-700">Password:</label>
+      <div class="relative mt-1">
+        {% render_field form.password class+="bg-gray-100 p-3 rounded-lg text-sm w-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder='Enter your password' %}
+      </div>
+      {% if form.password.errors %}
+      <ul class="mt-2 text-red-500 text-sm">
+        {% for error in form.password.errors %}
+        <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
     </div>
-    <div class="flex justify-end w-full">
-        <button type="submit"
-        class="bg-green-500 hover:bg-green-700 text-white font-sans font-bold rounded py-2 px-4 w-full">
+
+    <div class="flex items-center justify-between w-full mb-5">
+      <div class="text-sm">
+        <a href="{% url 'main:register' %}" class="font-medium text-indigo-500 hover:text-indigo-600">
+          <span class="text-gray-700">Don't have an account yet?</span> Register Now!
+        </a>
+      </div>
+    </div>
+
+    <div class="w-full">
+      <button type="submit"
+        class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
         Login
-        </button>
+      </button>
     </div>
-
 
     {% if form.errors and form.is_bound %}
-      <div class="mb-4 w-full">
+      <div class="mt-4 w-full">
         <ul class="text-red-500">
           {% for error in form.non_field_errors %}
             <li>{{ error }}</li>
@@ -61,16 +68,14 @@
         </ul>
       </div>
     {% endif %}
-    </form>
+  </form>
 
   {% if messages %}
-  <ul>
+  <ul class="mt-4 text-center">
     {% for message in messages %}
-    <li>{{ message }}</li>
+    <li class="text-green-500">{{ message }}</li>
     {% endfor %}
   </ul>
-  {% endif %} Don't have an account yet?
-  <a href="{% url 'main:register' %}" class="text-blue-500 underline">Register Now</a>
-</div>
+  {% endif %}
 
 {% endblock content %}

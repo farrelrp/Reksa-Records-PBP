@@ -1,6 +1,6 @@
 **Deployed : http://farrel-reksa-reksasrecords.pbp.cs.ui.ac.id/**
 
-# Tugas 1
+# Tugas 2
 
 ## A. Step-by-step Implementasi Checklist
 
@@ -103,7 +103,7 @@ Git berfungsi sebagai sebuah sistem version control yang dilakukan untuk melacak
 
 Model pada Django disebut sebagai ORM atau Object-Relational Mapping karena cara kerja model adalah menghubungkan objek-objek di dalam kode Python dengan tabel-tabel di dalam database relasional. Django juga menangani konversi dari objek Python ke data yang dapat diolah dengan SQL.
 
-# Tugas 2
+# Tugas 3
 
 ## A. Mengapa kita memerlukan data delivery dalam pengimplementasian sebuah platform?
 
@@ -186,7 +186,7 @@ CSRF (Cross-Site Request Forgery) adalah _cyberattack_ di mana penyerang mencoba
 **xml/id**
 ![image](https://github.com/user-attachments/assets/d58f851c-4bc7-40d4-9d0a-ee95eead6f06)
 
-# Tugas 3
+# Tugas 4
 
 ## A. Perbedaan antara HttpResponseRedirect() dan redirect()
 
@@ -386,7 +386,7 @@ Pada tempalte main.html,
 - Tambahkan `user = models.ForeignKey(User, on_delete=models.CASCADE)` untuk mengasosiakian tiap item vinyl dengan user yang menciptakannya
 - Pada views.py, pada view show_main, ubah cara pemanggilan item vinyl untuk filter berdasarkan user yang terasosiasi dengan vinyl tersebut dengan `vinyls = VinylRecord.objects.filter(user=request.user)
 
-# Tugas 4
+# Tugas 5
 
 ## A. Urutan Prioritas Pengambilan CSS Selector
 
@@ -412,8 +412,6 @@ Tampilan X.com akan berubah tergantung dengan ukuran dan orientasi web, dengan p
 ![image](https://github.com/user-attachments/assets/be615a93-e72c-445e-80c2-fc46c608b186)
 
 ![image](https://github.com/user-attachments/assets/883b25dc-023b-41dc-b1cb-189e996c4183)
-
-
 
 ### Contoh Unresponsive:
 
@@ -615,3 +613,409 @@ class=”flex md:hidden”
 - Pada login, membuat fields memiliki warna text yang lebih gelap dan font-weight yang lebih bold, menambah placeholder, dan membuat button submit lebih responsive dengan mengubah warna background dan hover nya.
 - Hal yang sama juga dilakukan pada register.
 - Pada create_vinyl, membuat input form berada di tengah dan membuat ukuran input lebih responsive.
+
+# Tugas 6
+
+## A. Manfaat dari penggunaan JavaScript dalam pengembangan aplikasi web
+
+Javascript yang sangat berguna dalam membuat web lebih dinamis dan interaktif karena kita dapat melakukan operasi - operasi yang tidak bisa dilakukan hanya dengan HTML dan CSS. Contohnya, ketika kita ingin menampilkan sesuatu hanya jika user telah mengklik sebuah button, kita dapat menggunakan JavaScript untuk menampilkan elemen tersebut. Inti dari JavaScript adalah untuk memberi elemen interaktivitas yang membuat sebuah website jauh lebih menarik dan nyaman untuk digunakan.
+
+## B. Fungsi await ketika fetch dan apa yang terjadi jika tidak menggunakan await
+
+Fungsi await dan fetch adalah fungsi asynchronous. Fungsi asynchronous adalah fungsi yang tidak langsung menunggu hasilnya, melainkan mengeksekusi fungsi tersebut secara berurutan. Fungsi `await` digunakan untuk menunggu hasil dari fungsi asynchronous tersebut. Jika tidak menggunakan `await`, fungsi tersebut akan langsung dieksekusi tanpa menunggu hasilnya.
+
+Await umumnya digunakan saat kita ingin menerima sebuah data dari API. Ekspektasinya adalah kita mengirim sebuah request dan menunggu response dari API tersebut untuk kita kemudian olah. Namun, jika tidak menggunakan `await`, fungsi 'pengolahan' ini akan langsung dieksekusi tanpa menunggu data dari API selesai dikirim.
+
+## C. Kebutuhan decorator csrf_exempt pada view untuk membuat AJAX POST
+
+Decorator `@csrf_exempt` diperlukan karena AJAX POST yang kita buat tidak akan membawa cookie (csrf token) sehingga membuat server tidak percaya bahwa request tersebut berasal dari aplikasi kita. Dengan decorator tersebut, kita memberi otorisasi kepada server untuk menganggap request tersebut legal bahkan tanpa CSRF verification.
+
+Hal ini sebenarnya bukan merupakan solusi yang ideal, karena menghapus kebutuhan CSRF verification akan memberi celah dan kesempatan untuk serangan - serangan pada web kita.
+
+## D. Mengapa pembersihan data (strip_tags) dilakukan di backend dan bukan frontend?
+
+Pembersihan data dilakukan di backend karena bagian frontend dimana user melakukan input sangat mudah untuk dimanipulasi. Banyak sekali cara untuk memanipulasi elemen HTML dan Javascript yang ditampilkan pada frontend.
+
+Oleh karena itu, pembersihan data dilakukan di backend untuk menghindari manipulasi data oleh user lewat frontend. Dengan melakukan di backend, kita dapat memastikan bahwa semua data yang akan diproses adalah data yang valid dan bebas dari manipulasi yang tidak diinginkan.
+
+## E. Implementasi Step by Step
+
+1. **Memanggil Card dengan AJAX**
+
+Di main html,
+
+- Mengubah cara memanggil card dari yang sebelumnya
+
+```html
+{% for vinyl in vinyls %} {% include "components/vinyl-card-main.html" %} {%
+endfor %}
+```
+
+menjadi
+
+```javascript
+<div id="vinyl-cards"></div>;
+
+async function getVinylEntries(query = "") {
+  let url = "{% url 'main:show_json' %}";
+  if (query) {
+    url += `?q=${encodeURIComponent(query)}`;
+  }
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  console.log(response);
+  return await response.json();
+}
+
+async function refreshVinylEntries(query = "") {
+  try {
+    const vinylEntries = await getVinylEntries(query);
+    console.log(vinylEntries);
+    renderVinylCards(vinylEntries);
+  } catch (error) {
+    console.error("Error fetching vinyl records:", error);
+    vinylCardsContainer.innerHTML =
+      '<p class="text-red-500">An error occurred while fetching vinyl records.</p>';
+  }
+}
+
+function renderVinylCards(vinyls) {
+  // Clear existing vinyl cards
+  vinylCardsContainer.innerHTML = "";
+
+  if (vinyls.length === 0) {
+    vinylCardsContainer.innerHTML = `
+          <div class="flex justify-center items-center w-full flex-col">
+            <p class="text-2xl font-bold text-center">No vinyl records found.</p>
+            <img src="{% static 'images/sad-face.svg' %}" alt="Sad Face" class="w-24 h-24 mt-4">
+          </div>
+        `;
+    return;
+  }
+
+  vinyls.forEach((vinyl) => {
+    const vinylCardHTML = createVinylCard(vinyl);
+    vinylCardsContainer.insertAdjacentHTML("beforeend", vinylCardHTML);
+  });
+}
+
+vinylCardsContainer.addEventListener("click", async function (event) {
+  const button = event.target.closest(".favorite-toggle");
+
+  if (button) {
+    event.preventDefault();
+    console.log("Favorite toggle clicked");
+
+    const vinylId = button.dataset.vinylId;
+    const isFavorited = button.dataset.favorited === "true";
+    const url = isFavorited
+      ? `/remove_from_favorites_ajax/${vinylId}/`
+      : `/add_to_favorites_ajax/${vinylId}/`;
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({ vinylId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      refreshVinylEntries();
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
+  }
+});
+
+function createVinylCard(vinyl) {
+  const isFavorited = vinyl.fields.favorited_by.includes(parseInt(currentUser));
+
+  return `
+      <div class="vinyl-card bg-white shadow-md rounded-lg overflow-hidden w-64 h-auto transform transition-transform hover:scale-110 hover:shadow-xl relative">
+        <button class="absolute top-2 right-2 text-yellow-500 favorite-toggle" data-vinyl-id="${
+          vinyl.pk
+        }" data-favorited="${isFavorited}">
+          ${
+            isFavorited
+              ? `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 fill-current" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          `
+              : `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.957a1 1 0 00.95.69h4.15c.969 0 1.371 1.24.588 1.81l-3.357 2.44a1 1 0 00-.364 1.118l1.286 3.957c.3.921-.755 1.688-1.54 1.118l-3.357-2.44a1 1 0 00-1.175 0l-3.357 2.44c-.784.57-1.838-.197-1.54-1.118l1.286-3.957a1 1 0 00-.364-1.118L2.465 9.384c-.783-.57-.38-1.81.588-1.81h4.15a1 1 0 00.95-.69l1.286-3.957z" />
+            </svg>
+          `
+          }
+        </button>
+        <div class="vinyl-card-image">
+          <img src="${mediaUrl}${
+    vinyl.fields.image
+  }" alt="Vinyl Image" class="vinyl-image w-full h-48 object-fit" />
+        </div>
+        <div class="vinyl-info p-4">
+          <h3 class="vinyl-title text-lg font-semibold mb-0.5">${
+            vinyl.fields.album_name
+          }</h3>
+          <h4 class="vinyl-artist text-gray-400"> by ${vinyl.fields.artist}</h4>
+          <h4 class="vinyl-price text-green-800 font-semibold mt-2">$${
+            vinyl.fields.price
+          }</h4>
+        </div>
+        <a href="/edit_vinyl/${
+          vinyl.pk
+        }/" class="absolute bottom-2 right-2 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="white" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+        </a>
+      </div>
+      `;
+}
+```
+
+Sistem untuk menampilkan card berdasarkan query pencarian diatas adalah dengan menggunakan fungsi `getVinylEntries` yang akan mengirim request ke url `{% url 'main:show_json' %}` dan menampilkan hasilnya menggunakan fungsi `renderVinylCards` untuk menampilkan card-card tersebut. Lakukan juga `refreshVinylEntries` untuk menampilkan card-card yang baru saja di tambahkan.
+
+2. **Membuat form tambah vinyl menggunakan AJAX**
+
+Di main.html,
+
+- Menambahkan modal untuk menambahkan vinyl baru
+- Membuat form untuk menambahkan vinyl baru
+- Membuat fungsi untuk menambahkan vinyl baru menggunakan AJAX
+
+Pertama kita membuat view baru untuk menambahkan vinyl baru dengan menggunakan AJAX, `create_vinyl_ajax`. Kemudian, kita membuat urls.py untuk mengassign pathnya.
+
+```python
+@csrf_exempt
+@require_POST
+@login_required(login_url='/login')
+def create_vinyl_ajax(request):
+    album_name = strip_tags(request.POST.get("album_name"))
+    artist = strip_tags(request.POST.get("artist"))
+    genre = strip_tags(request.POST.get("genre"))
+    price = request.POST.get("price")
+    description = strip_tags(request.POST.get("description"))
+    image = request.FILES.get("image")
+
+    if not all([album_name, artist, genre, price, description, image]):
+        return JsonResponse({'errors': 'All fields are required.'}, status=400)
+
+    vinyl = VinylRecord(
+        album_name=album_name,
+        artist=artist,
+        genre=genre,
+        price=price,
+        description=description,
+        user=request.user,
+        image=image
+    )
+
+    vinyl.save()
+
+    data = {
+        'vinyl': {
+            'id': vinyl.id,
+            'album_name': vinyl.album_name,
+            'artist': vinyl.artist,
+            'genre': vinyl.genre,
+            'price': str(vinyl.price),
+            'description': vinyl.description,
+            'image_url': vinyl.image.url,
+            'favorited_by': [user.username for user in vinyl.favorited_by.all()],
+        }
+    }
+
+    return JsonResponse(data, status=201)
+```
+
+Tambahkan routing untuk `create_vinyl_ajax` di urls.py.
+
+```python
+path('create_vinyl_ajax/', create_vinyl_ajax, name='create_vinyl_ajax'),
+```
+
+Di header, ubah button create vinyl menjadi button yang memiliki class `open-create-vinyl-modal` dan ketika diklik akan memanggil fungsi `openCreateVinylModal` untuk menampilkan modal.
+
+Di main.html, buatlah modal untuk menambahkan vinyl baru dengan id `create-vinyl-modal`. Berikan class `hidden` untuk menghilangkan modal tersebut secara default.
+
+```html
+<div
+  id="create-vinyl-modal"
+  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="create-vinyl-title"
+>
+  <div
+    class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-full overflow-y-auto"
+  >
+    <button
+      id="close-create-vinyl-modal"
+      class="absolute top-2 right-2 text-red-600 hover:text-red-800 font-extrabold text-4xl"
+      aria-label="Close Modal"
+    >
+      &times;
+    </button>
+    <h2
+      id="create-vinyl-title"
+      class="text-2xl  font-bold mb-4 text-center justify-center items-center"
+    >
+      Create New Vinyl Record
+    </h2>
+    <form id="create-vinyl-form" class="space-y-2">
+      {% csrf_token %}
+      <div>
+        <label for="album_name" class="block text-lg font-semibold"
+          >Album Name:</label
+        >
+        <input
+          type="text"
+          id="album_name"
+          name="album_name"
+          class="bg-gray-200 p-2 rounded-lg w-full"
+          placeholder="Album Name"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="artist" class="block text-lg font-semibold">Artist:</label>
+        <input
+          type="text"
+          id="artist"
+          name="artist"
+          class="bg-gray-200 p-2 rounded-lg w-full"
+          placeholder="Artist Name"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="genre" class="block text-lg font-semibold">Genre:</label>
+        <select
+          id="genre"
+          name="genre"
+          class="bg-gray-200 p-2 rounded-lg w-full"
+          required
+        >
+          {% for value,display in genres %}
+          <option value="{{ value }}">{{ display }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label for="price" class="block text-lg font-semibold">Price:</label>
+        <input
+          type="number"
+          id="price"
+          name="price"
+          class="bg-gray-200 p-2 rounded-lg w-full"
+          placeholder="Retail Price"
+          step="0.01"
+          required
+        />
+      </div>
+
+      <div>
+        <label for="description" class="block text-lg font-semibold"
+          >Description:</label
+        >
+        <textarea
+          id="description"
+          name="description"
+          class="bg-gray-200 p-2 rounded-lg w-full"
+          placeholder="Album Description"
+          required
+        ></textarea>
+      </div>
+
+      <div>
+        <label for="image" class="block text-lg font-semibold"
+          >Album Cover:</label
+        >
+        <input
+          type="file"
+          id="image"
+          name="image"
+          class="bg-gray-200 p-2 rounded-lg w-full"
+          accept="image/*"
+          required
+        />
+      </div>
+
+      <div class="flex justify-end gap-4">
+        <button
+          type="button"
+          id="cancel-create-vinyl"
+          class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Create Vinyl Record
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+```
+
+Form juga digunakan untuk mengambil data dari user dan mengirimkannya ke `create_vinyl_ajax` menggunakan AJAX. Dengan menggunakan `FormData`, kita dapat mengirim data tersebut ke server.
+
+JavaScript untuk menampilkan modal dan menangani form tambah vinyl baru.
+
+```javascript
+document.addEventListener('DOMContentLoaded', function() {
+    const openCreateVinylModalButtons = document.querySelectorAll('.open-create-vinyl-modal');
+    const createVinylModal = document.getElementById('create-vinyl-modal');
+    const closeCreateVinylModalButton = document.getElementById('close-create-vinyl-modal');
+    const cancelCreateVinylButton = document.getElementById('cancel-create-vinyl');
+    const createVinylForm = document.getElementById('create-vinyl-form');
+
+    function openCreateVinylModal() {
+      createVinylModal.classList.remove('hidden');
+      createVinylForm.querySelector('input, textarea').focus();
+
+      if (!mobileMenu.classList.contains('hidden')) {
+        toggleMenu();
+  }
+    }
+
+    function closeCreateVinylModal() {
+      createVinylModal.classList.add('hidden');
+      createVinylForm.reset();
+    }
+
+    openCreateVinylModalButtons.forEach(button => {
+      button.addEventListener('click', openCreateVinylModal);
+    });
+    closeCreateVinylModalButton.addEventListener('click', closeCreateVinylModal);
+    cancelCreateVinylButton.addEventListener('click', closeCreateVinylModal);
+```
+
+3. **Memastikan input dilakukan dengan aman**
+
+Kita menggunakan decorator library strip_tags untuk memastikan bahwa input dilakukan dengan aman. Tambahkan verifikasi strip_tags setelah user mengirim data ke view `create_vinyl_ajax`.
+
+```python
+album_name = strip_tags(request.POST.get("album_name"))
+artist = strip_tags(request.POST.get("artist"))
+genre = strip_tags(request.POST.get("genre"))
+price = request.POST.get("price")
+description = strip_tags(request.POST.get("description"))
+```
+
+Hal ini memastikan bahwa input dilakukan dengan aman dan tidak ada tag HTML yang dimasukkan untuk mencegah serangan XSS (Cross-Site Scripting).
