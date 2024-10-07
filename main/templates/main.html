@@ -23,12 +23,12 @@
 <div id="vinyl-cards" class="flex flex-wrap gap-6 mx-4"></div>
 <!-- Create Vinyl Modal -->
 <div id="create-vinyl-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden" role="dialog" aria-modal="true" aria-labelledby="create-vinyl-title">
-  <div class="bg-white rounded-lg shadow-lg w-11/12 max-w-2xl p-6 relative">
-    <button id="close-create-vinyl-modal" class="absolute top-2 right-2 text-gray-600 hover:text-gray-800" aria-label="Close Modal">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-full overflow-y-auto">
+    <button id="close-create-vinyl-modal" class="absolute top-2 right-2 text-red-600 hover:text-red-800 font-extrabold text-4xl" aria-label="Close Modal">
       &times;
     </button>
-    <h2 id="create-vinyl-title" class="text-2xl font-bold mb-4">Create New Vinyl Record</h2>
-    <form id="create-vinyl-form" class="space-y-4">
+    <h2 id="create-vinyl-title" class="text-2xl  font-bold mb-4 text-center justify-center items-center">Create New Vinyl Record</h2>
+    <form id="create-vinyl-form" class="space-y-2">
       {% csrf_token %}
       <div>
         <label for="album_name" class="block text-lg font-semibold">Album Name:</label>
@@ -39,17 +39,13 @@
         <label for="artist" class="block text-lg font-semibold">Artist:</label>
         <input type="text" id="artist" name="artist" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="Artist Name" required>
       </div>
-      
-      <div>
-        <label for="release_year" class="block text-lg font-semibold">Release Year:</label>
-        <input type="number" id="release_year" name="release_year" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="e.g., 2023" required>
-      </div>
+  
       
       <div>
         <label for="genre" class="block text-lg font-semibold">Genre:</label>
         <select id="genre" name="genre" class="bg-gray-200 p-2 rounded-lg w-full" required>
-          {% for genre in genres %}
-            <option value="{{ genre }}">{{ genre }}</option>
+          {% for value,display in genres %}
+            <option value="{{ value }}">{{ display }}</option>
           {% endfor %}
         </select>
       </div>
@@ -85,7 +81,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     // Elements 
-    const openCreateVinylModalButton = document.getElementById('open-create-vinyl-modal');
+    const openCreateVinylModalButtons = document.querySelectorAll('.open-create-vinyl-modal');
     const createVinylModal = document.getElementById('create-vinyl-modal');
     const closeCreateVinylModalButton = document.getElementById('close-create-vinyl-modal');
     const cancelCreateVinylButton = document.getElementById('cancel-create-vinyl');
@@ -95,6 +91,10 @@
     function openCreateVinylModal() {
       createVinylModal.classList.remove('hidden');
       createVinylForm.querySelector('input, textarea').focus();
+
+      if (!mobileMenu.classList.contains('hidden')) {
+        toggleMenu();
+  }
     }
 
     function closeCreateVinylModal() {
@@ -102,7 +102,9 @@
       createVinylForm.reset();
     }
 
-    openCreateVinylModalButton.addEventListener('click', openCreateVinylModal);
+    openCreateVinylModalButtons.forEach(button => {
+      button.addEventListener('click', openCreateVinylModal);
+    });
     closeCreateVinylModalButton.addEventListener('click', closeCreateVinylModal);
     cancelCreateVinylButton.addEventListener('click', closeCreateVinylModal);
 
@@ -111,6 +113,9 @@
       event.preventDefault();
       console.log("Form submitted");
       const formData = new FormData(createVinylForm);
+  //     for (let [key, value] of formData.entries()) {
+  //    console.log(`${key}: ${value}`);
+  //  }
       console.log(formData);
       try {
         const response = await fetch("{% url 'main:create_vinyl_ajax' %}", {
@@ -121,15 +126,15 @@
           body: formData
         });
         console.log(response);
+        console.log(response.status);
         if (response.status === 201) {
           const data = await response.json();
           console.log('Vinyl Created:', data);
-
           
-          const vinylCardHTML = createVinylCard(data.vinyl);
-          document.getElementById('vinyl-cards').insertAdjacentHTML('beforeend', vinylCardHTML);
-
-      
+          // const vinylCardHTML = createVinylCard(data.vinyl);
+          // document.getElementById('vinyl-cards').insertAdjacentHTML('beforeend', vinylCardHTML);
+          refreshVinylEntries();
+          
           closeCreateVinylModal();
         } else {
           const errorData = await response.json();
@@ -137,8 +142,7 @@
           alert('Error creating vinyl: ' + JSON.stringify(errorData.errors));
         }
       } catch (error) {
-        console.error('Error:', error);
-        alert('An unexpected error occurred.');
+        console.error('Error:', error); 
       }
     });
 
@@ -195,7 +199,7 @@
         return;
       }
 
-      // Iterate over each vinyl record and create HTML elements
+
       vinyls.forEach(vinyl => {
         const vinylCardHTML = createVinylCard(vinyl);
         vinylCardsContainer.insertAdjacentHTML('beforeend', vinylCardHTML);
@@ -235,7 +239,6 @@
 
 
     function createVinylCard(vinyl) {
-      // Determine if the current user has favorited this vinyl
       const isFavorited = vinyl.fields.favorited_by.includes(parseInt(currentUser));
 
 
@@ -286,7 +289,7 @@
       }
     }
 
-    // Initial load
+    // Load Pertama
     refreshVinylEntries();
   });
 </script>

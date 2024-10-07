@@ -16,7 +16,7 @@
       </div>
       <div class="flex items-center space-x-4 text-xl font-bold">
         <a href="{% url 'main:show_favorites' %}" class="text-gray-400 hover:text-black">Favorites</a>
-        <button id="open-create-vinyl-modal" class="text-gray-400 hover:text-black">Create Vinyl</button>
+        <button class="open-create-vinyl-modal text-gray-400 hover:text-black">Create Vinyl</button>
         <a href="{% url 'main:logout' %}" class="text-gray-400 hover:text-red-500">Logout</a>
       </div>
     </div>
@@ -31,7 +31,7 @@
   <!-- Mobile Menu -->
   <div id="mobile-menu" class="hidden flex flex-col items-end w-full bg-white shadow-md py-4 space-y-4 font-bold px-4">
     <a href="{% url 'main:show_favorites' %}" class="text-gray-600 hover:text-black text-center text-lg">Favorites</a>
-    <a href="{% url 'main:create_vinyl' %}" class="text-gray-600 hover:text-black text-center text-lg">Add Vinyl</a>
+    <button class="open-create-vinyl-modal text-gray-600 hover:text-black">Create Vinyl</button>
     <a href="{% url 'main:logout' %}" class="text-gray-600 hover:text-black text-center text-lg">Logout</a>
     <form method="GET" action="{% url 'main:show_main' %}" class="flex w-5/6 mt-4 font-normal" id="search-form">
       <input type="text" name="q" placeholder="Search vinyls..." class="p-2 border rounded w-full" id="search-input">
@@ -46,12 +46,12 @@
     const mobileMenu = document.getElementById('mobile-menu');
     const toggleMenu = () => {
       mobileMenu.classList.toggle('hidden');
-      document.body.classList.toggle('overflow-hidden'); // Prevent scrolling when menu is open
+      document.body.classList.toggle('overflow-hidden'); // Gabisa scroll if menu terbuka
     };
     
     burgerMenu.addEventListener('click', toggleMenu);
     
-    // Close mobile menu when clicking outside
+    // Close menu jika diklik diluar
     document.addEventListener('click', function(event) {
       if (!mobileMenu.contains(event.target) && !burgerMenu.contains(event.target)) {
         if (!mobileMenu.classList.contains('hidden')) {
@@ -60,7 +60,7 @@
       }
     });
     
-    // Close mobile menu on window resize if width >= 768px
+    // Close menu jika width >= 768px
     window.addEventListener('resize', function() {
       if (window.innerWidth >= 768 && !mobileMenu.classList.contains('hidden')) {
         toggleMenu();

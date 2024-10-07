@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import VinylRecord
 from .forms import VinylRecordForm
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -14,6 +14,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.conf import settings
+from django.utils.html import strip_tags
 # Create your views here.
 
 
@@ -27,7 +28,7 @@ def show_main(request):
         'aplikasi': "Reksa's Records",
         'last_login': request.COOKIES.get('last_login'),
         "MEDIA_URL": settings.MEDIA_URL,
-        "genres": [genre[1] for genre in VinylRecord.GENRE_CHOICES], # Ambil genre dari VinylRecord
+        "genres": VinylRecord.GENRE_CHOICES, # Ambil genre dari VinylRecord
     }
     return render(request, "main.html", context)
 
@@ -58,30 +59,47 @@ def create_vinyl(request):
 
     return render(request, "create_vinyl.html", context)
 
-@csrf_exempt
+@csrf_exempt  # Consider removing this if you handle CSRF properly
 @require_POST
+@login_required(login_url='/login')  # Ensure the user is authenticated
 def create_vinyl_ajax(request):
-    if request.method == 'POST':
-        album_name = request.POST.get("album_name")
-        artist = request.POST.get("artist")
-        release_year = request.POST.get("release_year")
-        genre = request.POST.get("genre")
-        price = request.POST.get("price")
-        description = request.POST.get("description")
+    album_name = strip_tags(request.POST.get("album_name"))
+    artist = strip_tags(request.POST.get("artist"))
+    genre = strip_tags(request.POST.get("genre"))
+    price = request.POST.get("price")
+    description = strip_tags(request.POST.get("description"))
+    image = request.FILES.get("image")
 
-        vinyl = VinylRecord(
-            album_name=album_name,
-            artist=artist,
-            release_year=release_year,
-            genre=genre,
-            price=price,
-            description=description,
-            user=request.user
-        )
+    if not all([album_name, artist, genre, price, description, image]):
+        return JsonResponse({'errors': 'All fields are required.'}, status=400)
 
-        vinyl.save()
-        return HttpResponse(b"CREATED", status=201)
-    return HttpResponseNotFound()
+    vinyl = VinylRecord(
+        album_name=album_name,
+        artist=artist,
+        genre=genre,
+        price=price,
+        description=description,
+        user=request.user,
+        image=image
+    )
+
+    vinyl.save()
+
+    # Prepare the data to return
+    data = {
+        'vinyl': {
+            'id': vinyl.id,
+            'album_name': vinyl.album_name,
+            'artist': vinyl.artist,
+            'genre': vinyl.genre,
+            'price': str(vinyl.price),  # Convert to string if it's a Decimal
+            'description': vinyl.description,
+            'image_url': vinyl.image.url,
+            'favorited_by': [user.username for user in vinyl.favorited_by.all()],
+        }
+    }
+
+    return JsonResponse(data, status=201)
 
 @csrf_exempt
 @require_POST
