@@ -40,6 +40,7 @@ def show_favorites(request):
         'vinyls': vinyls,
         'last_login': request.COOKIES.get('last_login'),
         "MEDIA_URL": settings.MEDIA_URL,
+        "genres": VinylRecord.GENRE_CHOICES,
     }
     return render(request, "favorites.html", context)
 
@@ -61,7 +62,7 @@ def create_vinyl(request):
 
 @csrf_exempt 
 @require_POST
-@login_required(login_url='/login')  # Ensure the user is authenticated
+@login_required(login_url='/login')
 def create_vinyl_ajax(request):
     album_name = strip_tags(request.POST.get("album_name"))
     artist = strip_tags(request.POST.get("artist"))
@@ -84,15 +85,14 @@ def create_vinyl_ajax(request):
     )
 
     vinyl.save()
-
-    # Prepare the data to return
+    
     data = {
         'vinyl': {
             'id': vinyl.id,
             'album_name': vinyl.album_name,
             'artist': vinyl.artist,
             'genre': vinyl.genre,
-            'price': str(vinyl.price),  # Convert to string if it's a Decimal
+            'price': vinyl.price, 
             'description': vinyl.description,
             'image_url': vinyl.image.url,
             'favorited_by': [user.username for user in vinyl.favorited_by.all()],

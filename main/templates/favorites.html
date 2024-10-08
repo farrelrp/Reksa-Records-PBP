@@ -4,14 +4,146 @@
 <div class="bg-green-500 text-white py-8 px-4 mb-4 flex flex-col items-center">
   <h1 class="text-4xl font-bold mb-2">Hello, {{ name }}!</h1>
   <h2 class="text-2xl">🎵 Your <b>favorite</b> vinyl records! 🎵</h2>
+  <h2 class="text-xl">Last Login Session: {{ last_login }}</h2>
 </div>
-
-
+<!-- <div class="mx-4">
+  <div class="flex flex-wrap gap-6">
+    {% for vinyl in vinyls %} {% include "components/vinyl-card-main.html" %} 
+    {% empty %}
+    <div class="flex justify-center items-center w-full">
+      <p class="text-2xl font-bold text-center">No vinyl records found.</p>
+      <img src="{% static 'images/sad-face.svg' %}" alt="Sad Face" class="w-24 h-24 mt-4">
+    </div>
+    {% endfor %}
+  </div>
+</div> -->
 <div id="vinyl-cards" class="flex flex-wrap gap-6 mx-4"></div>
+<!-- Create Vinyl Modal -->
+<div id="create-vinyl-modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden" role="dialog" aria-modal="true" aria-labelledby="create-vinyl-title">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-xl p-6 relative max-h-full overflow-y-auto">
+    <button id="close-create-vinyl-modal" class="absolute top-2 right-2 text-red-600 hover:text-red-800 font-extrabold text-4xl" aria-label="Close Modal">
+      &times;
+    </button>
+    <h2 id="create-vinyl-title" class="text-2xl  font-bold mb-4 text-center justify-center items-center">Create New Vinyl Record</h2>
+    <form id="create-vinyl-form" class="space-y-2">
+      {% csrf_token %}
+      <div>
+        <label for="album_name" class="block text-lg font-semibold">Album Name:</label>
+        <input type="text" id="album_name" name="album_name" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="Album Name" required>
+      </div>
+      
+      <div>
+        <label for="artist" class="block text-lg font-semibold">Artist:</label>
+        <input type="text" id="artist" name="artist" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="Artist Name" required>
+      </div>
+  
+      
+      <div>
+        <label for="genre" class="block text-lg font-semibold">Genre:</label>
+        <select id="genre" name="genre" class="bg-gray-200 p-2 rounded-lg w-full" required>
+          {% for value,display in genres %}
+            <option value="{{ value }}">{{ display }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      
+      <div>
+        <label for="price" class="block text-lg font-semibold">Price:</label>
+        <input type="number" id="price" name="price" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="Retail Price" step="0.01" required>
+      </div>
+      
+      <div>
+        <label for="description" class="block text-lg font-semibold">Description:</label>
+        <textarea id="description" name="description" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="Album Description" required></textarea>
+      </div>
+      
+      <div>
+        <label for="image" class="block text-lg font-semibold">Album Cover:</label>
+        <input type="file" id="image" name="image" class="bg-gray-200 p-2 rounded-lg w-full" accept="image/*" required>
+      </div>
+      
+      <div class="flex justify-end gap-4">
+        <button type="button" id="cancel-create-vinyl" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+          Cancel
+        </button>
+        <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+          Create Vinyl Record
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+    // Elements 
+    const openCreateVinylModalButtons = document.querySelectorAll('.open-create-vinyl-modal');
+    const createVinylModal = document.getElementById('create-vinyl-modal');
+    const closeCreateVinylModalButton = document.getElementById('close-create-vinyl-modal');
+    const cancelCreateVinylButton = document.getElementById('cancel-create-vinyl');
+    const createVinylForm = document.getElementById('create-vinyl-form');
+    const csrfToken = '{{ csrf_token }}'; // CSRF token from Django
+
+    function openCreateVinylModal() {
+      createVinylModal.classList.remove('hidden');
+      createVinylForm.querySelector('input, textarea').focus();
+
+      if (!mobileMenu.classList.contains('hidden')) {
+        toggleMenu();
+  }
+    }
+
+    function closeCreateVinylModal() {
+      createVinylModal.classList.add('hidden');
+      createVinylForm.reset();
+    }
+
+    openCreateVinylModalButtons.forEach(button => {
+      button.addEventListener('click', openCreateVinylModal);
+    });
+    closeCreateVinylModalButton.addEventListener('click', closeCreateVinylModal);
+    cancelCreateVinylButton.addEventListener('click', closeCreateVinylModal);
+
+    // AJAX form submission
+    createVinylForm.addEventListener('submit', async function(event) {
+      event.preventDefault();
+      console.log("Form submitted");
+      const formData = new FormData(createVinylForm);
+  //     for (let [key, value] of formData.entries()) {
+  //    console.log(`${key}: ${value}`);
+  //  }
+      console.log(formData);
+      try {
+        const response = await fetch("{% url 'main:create_vinyl_ajax' %}", {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': csrfToken,
+          },
+          body: formData
+        });
+        console.log(response);
+        console.log(response.status);
+        if (response.status === 201) {
+          const data = await response.json();
+          console.log('Vinyl Created:', data);
+          
+          // const vinylCardHTML = createVinylCard(data.vinyl);
+          // document.getElementById('vinyl-cards').insertAdjacentHTML('beforeend', vinylCardHTML);
+          refreshVinylEntries();
+          
+          closeCreateVinylModal();
+        } else {
+          const errorData = await response.json();
+          console.error('Error Creating Vinyl:', errorData);
+          alert('Error creating vinyl: ' + JSON.stringify(errorData.errors));
+        }
+      } catch (error) {
+        console.error('Error:', error); 
+      }
+    });
+
+
     const searchForm = document.getElementById('search-form');
     const searchInput = document.getElementById('search-input');
     const vinylCardsContainer = document.getElementById('vinyl-cards');
@@ -40,6 +172,7 @@
 
     async function refreshVinylEntries(query = '') {
       try {
+
         const vinylEntries = await getVinylEntries(query);
         console.log(vinylEntries);
         renderVinylCards(vinylEntries);
@@ -63,14 +196,13 @@
         return;
       }
 
-      // Iterate over each vinyl record and create HTML elements
+
       vinyls.forEach(vinyl => {
         const vinylCardHTML = createVinylCard(vinyl);
         vinylCardsContainer.insertAdjacentHTML('beforeend', vinylCardHTML);
       });
     }
 
-    // Event Delegation for Favorite Toggle Buttons
     vinylCardsContainer.addEventListener('click', async function(event) {
       const button = event.target.closest('.favorite-toggle');
 
@@ -86,13 +218,15 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'X-CSRFToken': '{{ csrf_token }}' // Ensure CSRF token is included
+              'X-CSRFToken': csrfToken 
             },
             body: JSON.stringify({ vinylId })
           });
+
           if (!response.ok) {
             throw new Error('Network response was not ok');
           }
+
           refreshVinylEntries();
         } catch (error) {
           console.error('Error toggling favorite:', error);
@@ -100,11 +234,11 @@
       }
     });
 
+
     function createVinylCard(vinyl) {
-      // Determine if the current user has favorited this vinyl
       const isFavorited = vinyl.fields.favorited_by.includes(parseInt(currentUser));
-      
-      // Create the HTML structure for a vinyl card
+
+
       return `
       <div class="vinyl-card bg-white shadow-md rounded-lg overflow-hidden w-64 h-auto transform transition-transform hover:scale-110 hover:shadow-xl relative">
         <button class="absolute top-2 right-2 text-yellow-500 favorite-toggle" data-vinyl-id="${vinyl.pk}" data-favorited="${isFavorited}">
@@ -125,8 +259,16 @@
           <h3 class="vinyl-title text-lg font-semibold mb-0.5">${vinyl.fields.album_name}</h3>
           <h4 class="vinyl-artist text-gray-400"> by ${vinyl.fields.artist}</h4>
           <h4 class="vinyl-price text-green-800 font-semibold mt-2">$${vinyl.fields.price}</h4>
+        </div>
+        <a href="/edit_vinyl/${vinyl.pk}/" class="absolute bottom-2 right-2 bg-blue-500 text-white rounded-full p-2 hover:bg-blue-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="white" viewBox="0 0 24 24" stroke="currentColor">
+            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+          </svg>
+        </a>
+      </div>
       `;
     }
+
 
     function updateFavoriteIcon(button, isFavorited) {
       if (isFavorited) {
@@ -144,7 +286,7 @@
       }
     }
 
-    // Initial load
+    // Load Pertama
     refreshVinylEntries();
   });
 </script>
