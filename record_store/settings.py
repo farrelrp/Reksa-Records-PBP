@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-i5n=(%fpt)a@g$itu)sym^ocidj!wfw#ksec&@h_*1g+!=vul)
 PRODUCTION = os.getenv("PRODUCTION", False)
 DEBUG = not PRODUCTION
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'farrel-reksa-reksasrecords.pbp.cs.ui.ac.id']
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", 'farrel-reksa-reksasrecords.pbp.cs.ui.ac.id', "10.0.2.2"]
 
 
 # Application definition
@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'widget_tweaks',
     'main',
+    'authentication',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -53,7 +55,16 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
+
 
 ROOT_URLCONF = 'record_store.urls'
 

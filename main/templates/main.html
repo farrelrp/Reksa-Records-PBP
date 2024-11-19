@@ -62,7 +62,7 @@
       
       <div>
         <label for="image" class="block text-lg font-semibold">Album Cover:</label>
-        <input type="file" id="image" name="image" class="bg-gray-200 p-2 rounded-lg w-full" accept="image/*" required>
+        <input id="image" name="image" class="bg-gray-200 p-2 rounded-lg w-full" placeholder="Album Cover Image Link" required>
       </div>
       
       <div class="flex justify-end gap-4">
@@ -256,7 +256,7 @@
           `}
         </button>
         <div class="vinyl-card-image">
-          <img src="${mediaUrl}${vinyl.fields.image}" alt="Vinyl Image" class="vinyl-image w-full h-48 object-fit" />
+          <img src="${vinyl.fields.image}" alt="Vinyl Image" class="vinyl-image w-full h-48 object-fit" />
         </div>
         <div class="vinyl-info p-4">
           <h3 class="vinyl-title text-lg font-semibold mb-0.5">${vinyl.fields.album_name}</h3>

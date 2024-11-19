@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404, render, redirect
 from .models import VinylRecord
 from .forms import VinylRecordForm
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseNotFound, JsonResponse
 from django.core import serializers
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -69,7 +69,7 @@ def create_vinyl_ajax(request):
     genre = strip_tags(request.POST.get("genre"))
     price = request.POST.get("price")
     description = strip_tags(request.POST.get("description"))
-    image = request.FILES.get("image")
+    image = request.POST.get('image')
 
     if not all([album_name, artist, genre, price, description, image]):
         return JsonResponse({'errors': 'All fields are required.'}, status=400)
@@ -94,7 +94,7 @@ def create_vinyl_ajax(request):
             'genre': vinyl.genre,
             'price': vinyl.price, 
             'description': vinyl.description,
-            'image_url': vinyl.image.url,
+            'image_url': vinyl.image,
             'favorited_by': [user.username for user in vinyl.favorited_by.all()],
         }
     }
@@ -108,7 +108,7 @@ def add_to_favorites_ajax(request, id):
         vinyl = get_object_or_404(VinylRecord, id=id)
         request.user.favorite_vinyls.add(vinyl)
         return HttpResponse(b"ADDED", status=201)
-    return HttpResponseNotFound()
+    return HttpResponseNotFound() 
 
 
 @csrf_exempt
@@ -216,7 +216,7 @@ def show_xml_by_id(request, id):
 
 
 def show_json_by_id(request, id):
-    vinyls = VinylRecord.objects.filter(id=id)
+    vinyls = VinylRecord.objects.filter(id=id)    
     data = serializers.serialize('json', vinyls)
     return HttpResponse(data, content_type='application/json')
 
@@ -238,3 +238,39 @@ def delete_vinyl(request, id):
 #     favorites = request.user.favorite_vinyls.all()
 #     context = {'favorites': favorites}
 #     return render(request, 'favorites.html', context) 
+from django.views.decorators.csrf import csrf_exempt
+import json
+from django.http import JsonResponse
+
+
+@csrf_exempt
+def create_vinyl_flutter(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        album_name = strip_tags(data.get("album_name"))
+        artist = strip_tags(data.get("artist"))
+        genre = strip_tags(data.get("genre"))
+        price = data.get("price")
+        description = strip_tags(data.get("description"))
+        image = data.get('image')
+
+        if not all([album_name, artist, genre, price, description, image]):
+            return JsonResponse({'errors': 'All fields are required.'}, status=400)
+
+        vinyl = VinylRecord(
+            album_name=album_name,
+            artist=artist,
+            genre=genre,
+            price=price,
+            description=description,
+            user=request.user,
+            image=image
+        )
+
+        vinyl.save()
+
+        
+
+        return JsonResponse({"status" : "success"}, status=201)
+    else:
+        return JsonResponse({"status": "error"}, status=401)
